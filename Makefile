@@ -1,5 +1,5 @@
-Version := "dev"
-# Version := $(shell git describe --tags --dirty)
+Version := $(shell git describe --tags --dirty)
+# Version := "dev"
 GitCommit := $(shell git rev-parse HEAD)
 LDFLAGS := "-s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit)"
 
