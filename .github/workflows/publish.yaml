@@ -35,6 +35,6 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          tags: ghcr.io/openfaas/classic-watchdog:${{ TAG }}
+          tags: ghcr.io/openfaas/classic-watchdog:${{ steps.get_tag.outputs.TAG }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
