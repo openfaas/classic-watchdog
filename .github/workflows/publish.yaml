@@ -6,12 +6,20 @@ on:
       - '*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  publish:
+    strategy:
+      matrix:
+        go-version: [ 1.13.x ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
         with:
           fetch-depth: 1
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
       - name: Make all
         run: make all
       - name: Get TAG
@@ -38,3 +46,9 @@ jobs:
           tags: ghcr.io/openfaas/classic-watchdog:${{ steps.get_tag.outputs.TAG }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '["./bin/watchdog*"]'
