@@ -44,11 +44,9 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ghcr.io/openfaas/classic-watchdog:${{ steps.get_tag.outputs.TAG }}
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
       - name: Upload release binaries
         uses: alexellis/upload-assets@0.2.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          asset_paths: '["./bin/watchdog*"]'
+          asset_paths: '["./bin/fwatchdog*"]'
