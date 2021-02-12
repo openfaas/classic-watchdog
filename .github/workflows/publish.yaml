@@ -25,6 +25,17 @@ jobs:
       - name: Get TAG
         id: get_tag
         run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+      - name: Get Repo Owner
+        id: get_repo_owner
+        run: >
+          echo ::set-output name=repo_owner::$(echo ${{ github.repository_owner }} |
+          tr '[:upper:]' '[:lower:]')
+      - name: Get Repo Name
+        id: get_repo_name
+        run: >
+          echo ::set-output name=repo_name::$(echo ${{ github.repository }} |
+          tr '[:upper:]' '[:lower:]' |
+          awk  -F'/' '{print $2}')
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -43,7 +54,7 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          tags: ghcr.io/openfaas/classic-watchdog:${{ steps.get_tag.outputs.TAG }}
+          tags: ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/${{ steps.get_repo_name.outputs.repo_name }}:${{ steps.get_tag.outputs.TAG }}
       - name: Upload release binaries
         uses: alexellis/upload-assets@0.2.2
         env:
