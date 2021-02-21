@@ -19,8 +19,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openfaas/faas/watchdog/metrics"
-	"github.com/openfaas/faas/watchdog/types"
+	"github.com/openfaas/classic-watchdog/metrics"
+	"github.com/openfaas/classic-watchdog/types"
 )
 
 var (

@@ -19,7 +19,7 @@ import (
 
 	limiter "github.com/openfaas/faas-middleware/concurrency-limiter"
 
-	"github.com/openfaas/faas/watchdog/types"
+	"github.com/openfaas/classic-watchdog/types"
 )
 
 type requestInfo struct {
