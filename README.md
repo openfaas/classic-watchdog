@@ -195,38 +195,3 @@ By default the watchdog will match the response of your function to the "Content
 * If your client sends a JSON post with a Content-Type of `text/plain` this will be matched automatically in the response too
 
 To override the Content-Type of all your responses set the `content_type` environmental variable.
-
-### I don't want to use the watchdog
-
-This is an unsupported use-case for the OpenFaaS project however if your container conforms to the requirements below then the OpenFaaS API gateway and other tooling will manage and scale your service.
-
-You will need to provide a lock-file at `/tmp/.lock` so that the orchestration system can run *health checks* against your container. If you are using Docker Swarm make sure you provide a `HEALTHCHECK` instruction in your Dockerfile - samples are given in the `faas` repository.
-
-* Expose TCP port 8080 over HTTP
-* Create `/tmp/.lock` or in whatever location responds to the OS tempdir syscall
-
-### Tuning auto-scaling
-
-Auto-scaling starts at 1 replica and steps up in blocks of 5:
-
-* 1->5
-* 5->10
-* 10->15
-* 15->20
-
-You can override the minimum and maximum scale of a function through labels.
-
-Add these labels to the deployment if you want to scale between 2 and 15 replicas.
-
-```
-com.openfaas.scale.min: "2"
-com.openfaas.scale.max: "15"
-```
-
-The labels are optional.
-
-**Disabling auto-scaling**
-
-If you want to disable auto-scaling for a function then set the minimum and maximum scale to the same value i.e. "1".
-
-As an alternative you can also remove AlertManager or scale it to 0 replicas.
