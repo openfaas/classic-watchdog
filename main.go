@@ -21,6 +21,7 @@ import (
 
 	"github.com/openfaas/classic-watchdog/metrics"
 	"github.com/openfaas/classic-watchdog/types"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 var (
@@ -67,6 +68,7 @@ func main() {
 
 	readTimeout := config.readTimeout
 	writeTimeout := config.writeTimeout
+	healthcheckInterval := config.healthcheckInterval
 
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", config.port),
@@ -77,10 +79,11 @@ func main() {
 
 	httpMetrics := metrics.NewHttp()
 
-	log.Printf("Timeouts: read: %s, write: %s hard: %s.\n",
+	log.Printf("Timeouts: read: %s write: %s hard: %s health: %s.\n",
 		readTimeout,
 		writeTimeout,
-		config.execTimeout)
+		config.execTimeout,
+		healthcheckInterval)
 	log.Printf("Listening on port: %d\n", config.port)
 
 	http.HandleFunc("/_/health", makeHealthHandler())
@@ -93,24 +96,14 @@ func main() {
 
 	go metricsServer.Serve(cancel)
 
-	shutdownTimeout := config.writeTimeout
-	listenUntilShutdown(shutdownTimeout, s, config.suppressLock)
-}
-
-func markUnhealthy() error {
-	atomic.StoreInt32(&acceptingConnections, 0)
-
-	path := filepath.Join(os.TempDir(), ".lock")
-	log.Printf("Removing lock-file : %s\n", path)
-	removeErr := os.Remove(path)
-	return removeErr
+	listenUntilShutdown(s, healthcheckInterval, writeTimeout, config.suppressLock, &httpMetrics)
 }
 
 // listenUntilShutdown will listen for HTTP requests until SIGTERM
 // is sent at which point the code will wait `shutdownTimeout` before
 // closing off connections and a futher `shutdownTimeout` before
 // exiting
-func listenUntilShutdown(shutdownTimeout time.Duration, s *http.Server, suppressLock bool) {
+func listenUntilShutdown(s *http.Server, healthcheckInterval time.Duration, writeTimeout time.Duration, suppressLock bool, httpMetrics *metrics.Http) {
 
 	idleConnsClosed := make(chan struct{})
 	go func() {
@@ -119,24 +112,29 @@ func listenUntilShutdown(shutdownTimeout time.Duration, s *http.Server, suppress
 
 		<-sig
 
-		log.Printf("SIGTERM received.. shutting down server in %s\n", shutdownTimeout.String())
+		log.Printf("SIGTERM: no new connections in %s\n", healthcheckInterval.String())
 
-		healthErr := markUnhealthy()
-
-		if healthErr != nil {
-			log.Printf("Unable to mark unhealthy during shutdown: %s\n", healthErr.Error())
+		if err := markUnhealthy(); err != nil {
+			log.Printf("Unable to mark server as unhealthy: %s\n", err.Error())
 		}
 
-		<-time.Tick(shutdownTimeout)
+		<-time.Tick(healthcheckInterval)
 
-		if err := s.Shutdown(context.Background()); err != nil {
-			// Error from closing listeners, or context timeout:
+		connections := int64(testutil.ToFloat64(httpMetrics.InFlight))
+		log.Printf("No new connections allowed, draining: %d requests\n", connections)
+
+		// The maximum time to wait for active connections whilst shutting down is
+		// equivalent to the maximum execution time i.e. writeTimeout.
+		ctx, cancel := context.WithTimeout(context.Background(), writeTimeout)
+		defer cancel()
+
+		if err := s.Shutdown(ctx); err != nil {
 			log.Printf("Error in Shutdown: %v", err)
 		}
 
-		log.Printf("No new connections allowed. Exiting in: %s\n", shutdownTimeout.String())
+		connections = int64(testutil.ToFloat64(httpMetrics.InFlight))
 
-		<-time.Tick(shutdownTimeout)
+		log.Printf("Exiting. Active connections: %d\n", connections)
 
 		close(idleConnsClosed)
 	}()
@@ -162,6 +160,15 @@ func listenUntilShutdown(shutdownTimeout time.Duration, s *http.Server, suppress
 	}
 
 	<-idleConnsClosed
+}
+
+func markUnhealthy() error {
+	atomic.StoreInt32(&acceptingConnections, 0)
+
+	path := filepath.Join(os.TempDir(), ".lock")
+	log.Printf("Removing lock-file : %s\n", path)
+	removeErr := os.Remove(path)
+	return removeErr
 }
 
 func printVersion() {

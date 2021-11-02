@@ -66,6 +66,7 @@ func (ReadConfig) Read(hasEnv HasEnv) WatchdogConfig {
 
 	cfg.readTimeout = parseIntOrDurationValue(hasEnv.Getenv("read_timeout"), time.Second*5)
 	cfg.writeTimeout = parseIntOrDurationValue(hasEnv.Getenv("write_timeout"), time.Second*5)
+	cfg.healthcheckInterval = parseIntOrDurationValue(hasEnv.Getenv("healthcheck_interval"), cfg.writeTimeout)
 
 	cfg.execTimeout = parseIntOrDurationValue(hasEnv.Getenv("exec_timeout"), time.Second*0)
 	cfg.port = parseIntValue(hasEnv.Getenv("port"), 8080)
@@ -105,6 +106,10 @@ type WatchdogConfig struct {
 
 	// HTTP write timeout
 	writeTimeout time.Duration
+
+	// healthcheckInterval is the interval that an external service runs its health checks to
+	// detect health and remove the watchdog from its pool of endpoints
+	healthcheckInterval time.Duration
 
 	// faasProcess is the process to exec
 	faasProcess string
