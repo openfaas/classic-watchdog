@@ -98,11 +98,20 @@ The watchdog can be configured through environmental variables. You must always 
 | `content_type`         | Force a specific Content-Type response for all responses |
 | `write_timeout`        | HTTP timeout for writing a response body from your function (in seconds)  |
 | `read_timeout`         | HTTP timeout for reading the payload from the client caller (in seconds) |
+| `healthcheck_interval` | Interval (in seconds) for HTTP healthcheck by container orchestrator i.e. kubelet. Used for graceful shutdowns. |
 | `suppress_lock`        | The watchdog will attempt to write a lockfile to /tmp/ for swarm healthchecks - set this to true to disable behaviour. |
 | `exec_timeout`         | Hard timeout for process exec'd for each incoming request (in seconds). Disabled if set to 0 |
 | `write_debug`          | Write all output, error messages, and additional information to the logs. Default is false |
 | `combine_output`       | True by default - combines stdout/stderr in function response, when set to false `stderr` is written to the container logs and stdout is used for function response |
 | `max_inflight`         | Limit the maximum number of requests in flight |
+
+## Metrics
+
+| Name                            | Description             | Type                   |
+|---------------------------------|-------------------------|------------------------|
+| http_requests_total             | Total number of requests | Counter               |
+| http_request_duration_seconds   | Duration of requests    | Histogram              |
+| http_requests_in_flight         | Number of requests in-flight | Gauge             |
 
 ## Advanced / tuning
 

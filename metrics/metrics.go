@@ -48,18 +48,22 @@ func (m *MetricsServer) Serve(cancel chan bool) {
 	}()
 
 	go func() {
-		select {
-		case <-cancel:
-			log.Printf("metrics server shutdown\n")
-
-			m.s.Shutdown(context.Background())
-		}
+		<-cancel
+		log.Printf("metrics server shutdown\n")
+		m.s.Shutdown(context.Background())
 	}()
 }
 
 // InstrumentHandler returns a handler which records HTTP requests
 // as they are made
 func InstrumentHandler(next http.Handler, _http Http) http.HandlerFunc {
-	return promhttp.InstrumentHandlerCounter(_http.RequestsTotal,
-		promhttp.InstrumentHandlerDuration(_http.RequestDurationHistogram, next))
+	return func(w http.ResponseWriter, r *http.Request) {
+		then := promhttp.InstrumentHandlerCounter(_http.RequestsTotal,
+			promhttp.InstrumentHandlerDuration(_http.RequestDurationHistogram, next))
+
+		_http.InFlight.Inc()
+		defer _http.InFlight.Dec()
+
+		then(w, r)
+	}
 }
