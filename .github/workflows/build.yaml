@@ -42,14 +42,14 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Build without push
+
+      - name: Test and Build multiarch
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: ./
           file: ./Dockerfile
-          push: false
-          outputs: type=registry
+          outputs: "type=image,push=false"
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: |
             ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/${{ steps.get_repo_name.outputs.repo_name }}:${{ github.sha }}
