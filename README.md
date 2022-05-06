@@ -1,9 +1,9 @@
 Watchdog
 ==========
 
-The watchdog provides an unmanaged and generic interface between the outside world and your function. Its job is to marshal a HTTP request accepted on the API Gateway and to invoke your chosen application. The watchdog is a tiny Golang webserver - see the diagram below for how this process works.
+The watchdog provides an interface between the outside world and your function. It starts a new process for each request and uses STDIO for communication.
 
-![](https://pbs.twimg.com/media/DGScDblUIAAo4H-.jpg:large)
+![Classic watchdog architecture](https://pbs.twimg.com/media/DGScDblUIAAo4H-.jpg:large)
 
 >  Above: a tiny web-server or shim that forks your desired process for every incoming HTTP request
 
