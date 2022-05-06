@@ -22,6 +22,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Make all
         run: make all
+
       - name: Get TAG
         id: get_tag
         run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
@@ -36,6 +37,7 @@ jobs:
           echo ::set-output name=repo_name::$(echo ${{ github.repository }} |
           tr '[:upper:]' '[:lower:]' |
           awk  -F'/' '{print $2}')
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
