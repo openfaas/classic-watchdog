@@ -2,6 +2,8 @@ Version := $(shell git describe --tags --dirty)
 # Version := "dev"
 GitCommit := $(shell git rev-parse HEAD)
 LDFLAGS := "-s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit)"
+GO111MODULE=on
+SOURCE_DIRS := $(shell find . -name '*.go' |grep -v vendor)
 
 .PHONY: all
 all: gofmt test dist hashgen
@@ -15,8 +17,8 @@ hashgen:
 	./ci/hashgen.sh
 
 .PHONY: gofmt
-gofmt: 
-	@test -z $(shell gofmt -l ./ | tee /dev/stderr) || (echo "[WARN] Fix formatting issues with 'make fmt'" && exit 1)
+gofmt:
+	@test -z $(shell gofmt -l -s $(SOURCE_DIRS) | tee /dev/stderr) || (echo "[WARN] Fix formatting issues with 'make gofmt'" && exit 1)
 
 .PHONY: dist
 dist: 
