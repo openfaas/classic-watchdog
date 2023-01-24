@@ -153,19 +153,20 @@ func TestRead_FprocessConfig(t *testing.T) {
 	}
 }
 
-func TestRead_EmptyTimeoutConfig(t *testing.T) {
+func TestRead_DefaultConfig_Timeouts(t *testing.T) {
 	defaults := NewEnvBucket()
 	readConfig := ReadConfig{}
 
 	config := readConfig.Read(defaults)
 
-	if (config.readTimeout) != time.Duration(5)*time.Second {
-		t.Log("readTimeout incorrect")
-		t.Fail()
+	wantReadTimeout := time.Second * 30
+	if config.readTimeout != wantReadTimeout {
+		t.Fatalf("readTimeout want: %v, got: %v", wantReadTimeout, config.readTimeout)
 	}
-	if (config.writeTimeout) != time.Duration(5)*time.Second {
-		t.Log("writeTimeout incorrect")
-		t.Fail()
+
+	wantWriteTimeout := time.Second * 30
+	if config.writeTimeout != wantWriteTimeout {
+		t.Fatalf("writeTimeout want: %v, got: %v", wantWriteTimeout, config.writeTimeout)
 	}
 }
 
@@ -202,11 +203,11 @@ func TestRead_ReadAndWriteTimeoutConfig(t *testing.T) {
 	readConfig := ReadConfig{}
 	config := readConfig.Read(defaults)
 
-	if (config.readTimeout) != time.Duration(10)*time.Second {
+	if (config.readTimeout) != 10*time.Second {
 		t.Logf("readTimeout incorrect, got: %d\n", config.readTimeout)
 		t.Fail()
 	}
-	if (config.writeTimeout) != time.Duration(60)*time.Second {
+	if (config.writeTimeout) != 60*time.Second {
 		t.Logf("writeTimeout incorrect, got: %d\n", config.writeTimeout)
 		t.Fail()
 	}
@@ -220,11 +221,11 @@ func TestRead_ReadAndWriteTimeoutDurationConfig(t *testing.T) {
 	readConfig := ReadConfig{}
 	config := readConfig.Read(defaults)
 
-	if (config.readTimeout) != time.Duration(20)*time.Second {
+	if (config.readTimeout) != 20*time.Second {
 		t.Logf("readTimeout incorrect, got: %d\n", config.readTimeout)
 		t.Fail()
 	}
-	if (config.writeTimeout) != time.Duration(90)*time.Second {
+	if (config.writeTimeout) != 90*time.Second {
 		t.Logf("writeTimeout incorrect, got: %d\n", config.writeTimeout)
 		t.Fail()
 	}
@@ -237,7 +238,7 @@ func TestRead_ExecTimeoutConfig(t *testing.T) {
 	readConfig := ReadConfig{}
 	config := readConfig.Read(defaults)
 
-	want := time.Duration(3) * time.Second
+	want := 3 * time.Second
 	if (config.execTimeout) != want {
 		t.Logf("execTimeout incorrect, got: %d - want: %s\n", config.execTimeout, want)
 		t.Fail()
