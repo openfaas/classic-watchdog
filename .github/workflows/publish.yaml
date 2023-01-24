@@ -61,7 +61,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: |
             ghcr.io/${{ env.REPO_OWNER }}/classic-watchdog:${{ github.sha }}
-            ghcr.io/${{ env.REPO_OWNER }}/classic-watchdog:${{ steps.get_tag.outputs.TAG }}
+            ghcr.io/${{ env.REPO_OWNER }}/classic-watchdog:${{ env.TAG }}
             ghcr.io/${{ env.REPO_OWNER }}/classic-watchdog:latest
 
       - name: Upload release binaries
