@@ -62,12 +62,15 @@ func (ReadConfig) Read(hasEnv HasEnv) WatchdogConfig {
 		combineOutput: true,
 	}
 
+	defaultTimeout := time.Second * 30
+
 	cfg.faasProcess = hasEnv.Getenv("fprocess")
 
-	cfg.readTimeout = parseIntOrDurationValue(hasEnv.Getenv("read_timeout"), time.Second*5)
-	cfg.writeTimeout = parseIntOrDurationValue(hasEnv.Getenv("write_timeout"), time.Second*5)
+	cfg.readTimeout = parseIntOrDurationValue(hasEnv.Getenv("read_timeout"), defaultTimeout)
+	cfg.writeTimeout = parseIntOrDurationValue(hasEnv.Getenv("write_timeout"), defaultTimeout)
 	cfg.healthcheckInterval = parseIntOrDurationValue(hasEnv.Getenv("healthcheck_interval"), cfg.writeTimeout)
 
+	// time.Second * 0 means that there is no hard i.e. "exec" timeout set
 	cfg.execTimeout = parseIntOrDurationValue(hasEnv.Getenv("exec_timeout"), time.Second*0)
 	cfg.port = parseIntValue(hasEnv.Getenv("port"), 8080)
 
@@ -114,7 +117,7 @@ type WatchdogConfig struct {
 	// faasProcess is the process to exec
 	faasProcess string
 
-	// duration until the faasProcess will be killed
+	// duration until faasProcess is killed, set to time.Second * 0 to disable
 	execTimeout time.Duration
 
 	// writeDebug write console stdout statements to the container
