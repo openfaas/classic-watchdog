@@ -86,9 +86,9 @@ Read my Docker Swarm tutorial on Healthchecks:
 
  * [Test-drive Docker Healthcheck in 10 minutes](http://blog.alexellis.io/test-drive-healthcheck/)
 
-**Environmental overrides:**
+## Environment variable overrides:
 
-The watchdog can be configured through environmental variables. You must always specifiy an `fprocess` variable.
+The watchdog can be configured through environment variables. You must always specifiy an `fprocess` variable.
 
 | Option                 | Usage             |
 |------------------------|--------------|
