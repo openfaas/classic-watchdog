@@ -3,6 +3,12 @@ Version := $(shell git describe --tags --dirty)
 GitCommit := $(shell git rev-parse HEAD)
 LDFLAGS := "-s -w -X main.Version=$(Version) -X main.GitCommit=$(GitCommit)"
 
+
+SERVER?=ghcr.io
+OWNER?=openfaas
+IMG_NAME?=classic-watchdog
+TAG?=$(Version)
+
 .PHONY: all
 all: gofmt test dist hashgen
 
@@ -26,3 +32,15 @@ dist:
 	GOARCH=arm64 CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -ldflags $(LDFLAGS) -installsuffix cgo -o bin/fwatchdog-arm64
 	GOOS=windows CGO_ENABLED=0 go build -mod=vendor -a -ldflags $(LDFLAGS) -installsuffix cgo -o bin/fwatchdog.exe
 	GOOS=darwin CGO_ENABLED=0 go build -mod=vendor -a -ldflags $(LDFLAGS) -installsuffix cgo -o bin/fwatchdog-darwin
+
+# Example:
+# SERVER=docker.io OWNER=alexellis2 TAG=ready make publish
+.PHONY: publish
+publish:
+	@echo  $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) && \
+	docker buildx create --use --name=multiarch --node=multiarch && \
+	docker buildx build \
+		--platform linux/amd64,linux/arm/v7,linux/arm64 \
+		--push=true \
+		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(TAG) \
+		.
