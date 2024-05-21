@@ -21,6 +21,7 @@ import (
 
 	"github.com/openfaas/classic-watchdog/metrics"
 	"github.com/openfaas/classic-watchdog/types"
+	"github.com/openfaas/faas-middleware/auth"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
@@ -86,8 +87,18 @@ func main() {
 		healthcheckInterval)
 	log.Printf("Listening on port: %d\n", config.port)
 
+	requestHandler := makeRequestHandler(&config)
+	if config.jwtAuthentication {
+		handler, err := makeJWTAuthHandler(config, requestHandler)
+		if err != nil {
+			log.Fatalf("Error creating JWTAuthMiddleware: %s", err.Error())
+		}
+		requestHandler = handler
+
+	}
+
 	http.HandleFunc("/_/health", makeHealthHandler())
-	http.HandleFunc("/", metrics.InstrumentHandler(makeRequestHandler(&config), httpMetrics))
+	http.HandleFunc("/", metrics.InstrumentHandler(requestHandler, httpMetrics))
 
 	metricsServer := metrics.MetricsServer{}
 	metricsServer.Register(config.metricsPort)
@@ -178,4 +189,47 @@ func printVersion() {
 	}
 
 	log.Printf("Version: %v\tSHA: %v\n", BuildVersion(), sha)
+}
+
+func makeJWTAuthHandler(c WatchdogConfig, next http.Handler) (http.Handler, error) {
+	namespace, err := getFnNamespace()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get function namespace: %w", err)
+	}
+	name, err := getFnName()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get function name: %w", err)
+	}
+
+	authOpts := auth.JWTAuthOptions{
+		Name:           name,
+		Namespace:      namespace,
+		LocalAuthority: c.jwtAuthLocal,
+		Debug:          c.jwtAuthDebug,
+	}
+
+	return auth.NewJWTAuthMiddleware(authOpts, next)
+}
+
+func getFnName() (string, error) {
+	name, ok := os.LookupEnv("OPENFAAS_NAME")
+	if !ok || len(name) == 0 {
+		return "", fmt.Errorf("env variable 'OPENFAAS_NAME' not set")
+	}
+
+	return name, nil
+}
+
+// getFnNamespace gets the namespace name from the env variable OPENFAAS_NAMESPACE
+// or reads it from the service account if the env variable is not present
+func getFnNamespace() (string, error) {
+	if namespace, ok := os.LookupEnv("OPENFAAS_NAMESPACE"); ok {
+		return namespace, nil
+	}
+
+	nsVal, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	if err != nil {
+		return "", err
+	}
+	return string(nsVal), nil
 }

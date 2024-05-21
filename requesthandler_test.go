@@ -45,7 +45,7 @@ func TestHandler_TransferEncodingPassedToFunction(t *testing.T) {
 		cgiHeaders:  true,
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -81,7 +81,7 @@ func TestHandler_HasCustomHeaderInFunction_WithCgi_Mode(t *testing.T) {
 		cgiHeaders:  true,
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -123,7 +123,7 @@ func TestHandler_HasCustomHeaderInFunction_WithCgiMode_AndBody(t *testing.T) {
 		cgiHeaders:  true,
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -164,7 +164,7 @@ func TestHandler_HasHostHeaderWhenSet(t *testing.T) {
 		cgiHeaders:  true,
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -194,7 +194,7 @@ func TestHandler_HostHeader_Empty_WhenNotSet(t *testing.T) {
 		cgiHeaders:  true,
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -229,7 +229,7 @@ func TestHandler_StderrWritesToStderr_CombinedOutput_False(t *testing.T) {
 	}
 
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusInternalServerError
 
@@ -270,7 +270,7 @@ func TestHandler_StderrWritesToResponse_CombinedOutput_True(t *testing.T) {
 	}
 
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusInternalServerError
 
@@ -317,7 +317,7 @@ func TestHandler_DoesntHaveCustomHeaderInFunction_WithoutCgi_Mode(t *testing.T) 
 		cgiHeaders:  false,
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -351,7 +351,7 @@ func TestHandler_HasXDurationSecondsHeader(t *testing.T) {
 		faasProcess: "cat",
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -383,7 +383,7 @@ func TestHandler_RequestTimeoutFailsForExceededDuration(t *testing.T) {
 		}
 
 		handler := makeRequestHandler(&config)
-		handler(rr, req)
+		handler.ServeHTTP(rr, req)
 
 		required := http.StatusRequestTimeout
 		if status := rr.Code; status != required {
@@ -409,7 +409,7 @@ func TestHandler_StatusOKAllowed_ForWriteableVerbs(t *testing.T) {
 			faasProcess: "cat",
 		}
 		handler := makeRequestHandler(&config)
-		handler(rr, req)
+		handler.ServeHTTP(rr, req)
 
 		required := http.StatusOK
 		if status := rr.Code; status != required {
@@ -435,7 +435,7 @@ func TestHandler_StatusMethodNotAllowed_ForUnknown(t *testing.T) {
 
 	config := WatchdogConfig{}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusMethodNotAllowed
 	if status := rr.Code; status != required {
@@ -458,7 +458,7 @@ func TestHandler_StatusOKForGETAndNoBody(t *testing.T) {
 	}
 
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {
@@ -553,7 +553,7 @@ func TestHandler_HasFullPathAndQueryInFunction_WithCgi_Mode(t *testing.T) {
 		cgiHeaders:  true,
 	}
 	handler := makeRequestHandler(&config)
-	handler(rr, req)
+	handler.ServeHTTP(rr, req)
 
 	required := http.StatusOK
 	if status := rr.Code; status != required {

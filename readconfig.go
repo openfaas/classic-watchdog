@@ -95,6 +95,10 @@ func (ReadConfig) Read(hasEnv HasEnv) WatchdogConfig {
 		cfg.combineOutput = parseBoolValue(hasEnv.Getenv("combine_output"))
 	}
 
+	cfg.jwtAuthentication = parseBoolValue(hasEnv.Getenv("jwt_auth"))
+	cfg.jwtAuthDebug = parseBoolValue(hasEnv.Getenv("jwt_auth_debug"))
+	cfg.jwtAuthLocal = parseBoolValue(hasEnv.Getenv("jwt_auth_local"))
+
 	cfg.metricsPort = 8081
 	cfg.maxInflight = parseIntValue(hasEnv.Getenv("max_inflight"), 0)
 
@@ -146,6 +150,17 @@ type WatchdogConfig struct {
 
 	// metricsPort is the HTTP port to serve metrics on
 	metricsPort int
+
+	// jwtAuthentication enables JWT authentication for the watchdog
+	// using the OpenFaaS gateway as the issuer.
+	jwtAuthentication bool
+
+	// jwtAuthDebug enables debug logging for the JWT authentication middleware.
+	jwtAuthDebug bool
+
+	// jwtAuthLocal indicates wether the JWT authentication middleware should use a port-forwarded or
+	// local gateway running at `http://127.0.0.1:8000` instead of attempting to reach it via an in-cluster service
+	jwtAuthLocal bool
 
 	// maxInflight limits the number of simultaneous
 	// requests that the watchdog allows concurrently.

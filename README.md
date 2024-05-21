@@ -104,6 +104,9 @@ The watchdog can be configured through environment variables. You must always sp
 | `write_debug`          | Write all output, error messages, and additional information to the logs. Default is false |
 | `combine_output`       | True by default - combines stdout/stderr in function response, when set to false `stderr` is written to the container logs and stdout is used for function response |
 | `max_inflight`         | Limit the maximum number of requests in flight |
+| `jwt_auth`                       | For OpenFaaS for Enterprises customers only. When set to `true`, the watchdog will require a JWT token to be passed as a Bearer token in the Authorization header. This token can only be obtained through the OpenFaaS gateway using a token exchange using the `http://gateway.openfaas:8080` address as the authority. |
+| `jwt_auth_debug`                 | Print out debug messages from the JWT authentication process (OpenFaaS for Enterprises only). |
+| `jwt_auth_local`                 | When set to `true`, the watchdog will attempt to validate the JWT token using a port-forwarded or local gateway running at `http://127.0.0.1:8080` instead of attempting to reach it via an in-cluster service name  (OpenFaaS for Enterprises only). |
 
 ## Metrics
 
