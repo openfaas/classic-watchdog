@@ -7,14 +7,18 @@ github.com/cespare/xxhash/v2
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
+# github.com/golang-jwt/jwt/v5 v5.2.1
+## explicit; go 1.18
+github.com/golang-jwt/jwt/v5
 # github.com/golang/protobuf v1.5.3
 ## explicit; go 1.9
 github.com/golang/protobuf/proto
 # github.com/matttproud/golang_protobuf_extensions v1.0.4
 ## explicit; go 1.9
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/openfaas/faas-middleware v1.2.3
+# github.com/openfaas/faas-middleware v1.2.4
 ## explicit; go 1.20
+github.com/openfaas/faas-middleware/auth
 github.com/openfaas/faas-middleware/concurrency-limiter
 # github.com/prometheus/client_golang v1.17.0
 ## explicit; go 1.19
@@ -37,8 +41,25 @@ github.com/prometheus/common/model
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
+# github.com/rakutentech/jwk-go v1.1.3
+## explicit; go 1.12
+github.com/rakutentech/jwk-go/jwk
+github.com/rakutentech/jwk-go/jwktypes
+github.com/rakutentech/jwk-go/okp
+# golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
+## explicit; go 1.11
+golang.org/x/crypto/blake2b
+golang.org/x/crypto/curve25519
+golang.org/x/crypto/ed25519
+golang.org/x/crypto/ed25519/internal/edwards25519
+golang.org/x/crypto/internal/subtle
+golang.org/x/crypto/nacl/box
+golang.org/x/crypto/nacl/secretbox
+golang.org/x/crypto/poly1305
+golang.org/x/crypto/salsa20/salsa
 # golang.org/x/sys v0.11.0
 ## explicit; go 1.17
+golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows

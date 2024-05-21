@@ -303,7 +303,7 @@ func makeHealthHandler() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func makeRequestHandler(config *WatchdogConfig) http.HandlerFunc {
+func makeRequestHandler(config *WatchdogConfig) http.Handler {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case
@@ -319,5 +319,5 @@ func makeRequestHandler(config *WatchdogConfig) http.HandlerFunc {
 
 		}
 	})
-	return limiter.NewConcurrencyLimiter(handler, config.maxInflight).ServeHTTP
+	return limiter.NewConcurrencyLimiter(handler, config.maxInflight)
 }
