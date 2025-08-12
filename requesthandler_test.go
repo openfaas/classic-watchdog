@@ -92,18 +92,18 @@ func TestHandler_HasCustomHeaderInFunction_WithCgi_Mode(t *testing.T) {
 	read, _ := ioutil.ReadAll(rr.Body)
 	val := string(read)
 	if !strings.Contains(val, "Http_ContentLength=0") {
-		t.Errorf(config.faasProcess+" should print: Http_ContentLength=0, got: %s\n", val)
+		t.Errorf("%s should print: Http_ContentLength=0, got: %s\n", config.faasProcess, val)
 	}
 	if !strings.Contains(val, "Http_Content_Length=0") {
-		t.Errorf(config.faasProcess+" should print: Http_Content_Length=0, got: %s\n", val)
+		t.Errorf("%s should print: Http_Content_Length=0, got: %s\n", config.faasProcess, val)
 	}
 	if !strings.Contains(val, "Http_Custom_Header") {
-		t.Errorf(config.faasProcess+" should print: Http_Custom_Header, got: %s\n", val)
+		t.Errorf("%s should print: Http_Custom_Header, got: %s\n", config.faasProcess, val)
 	}
 
 	seconds := rr.Header().Get("X-Duration-Seconds")
 	if len(seconds) == 0 {
-		t.Errorf(config.faasProcess + " should have given a duration as an X-Duration-Seconds header\n")
+		t.Errorf("%s should have given a duration as an X-Duration-Seconds header", config.faasProcess)
 	}
 }
 
@@ -361,7 +361,7 @@ func TestHandler_HasXDurationSecondsHeader(t *testing.T) {
 
 	seconds := rr.Header().Get("X-Duration-Seconds")
 	if len(seconds) == 0 {
-		t.Errorf("Exec of " + config.faasProcess + " should have given a duration as an X-Duration-Seconds header")
+		t.Errorf("Exec of %s should have given a duration as an X-Duration-Seconds header", config.faasProcess)
 	}
 }
 
