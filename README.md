@@ -27,64 +27,35 @@ The easiest way to create a function is to use a template and the FaaS CLI. The 
 
 **Package your function**
 
-Here's how to package your function if you don't want to use the CLI or have existing binaries or images:
-
-- [x] Use an existing or a new Docker image as base image `FROM`
-- [x] Add the fwatchdog binary from the [Releases page](https://github.com/openfaas/faas/releases) via `curl` or `ADD https://`
-- [x] Set an `fprocess` (function process) environmental variable with the function you want to run for each request
-- [x] Expose port 8080
-- [x] Set the `CMD` to `fwatchdog`
-
 Example Dockerfile for an `echo` function:
 
-```
-FROM alpine:3.13
+```Dockerfile
+FROM ghcr.io/openfaas/classic-watchdog:0.3.4 AS watchdog
 
-ADD https://github.com/openfaas/faas/releases/download/0.18.10/fwatchdog /usr/bin
+FROM alpine:3.22.1
+
+RUN mkdir -p /home/app
+
+COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
-# Define your binary here
-ENV fprocess="/bin/cat"
+# Add non root user
+RUN addgroup -S app && adduser app -S -G app
+RUN chown app /home/app
+
+WORKDIR /home/app
+
+USER app
+
+# Populate example here - i.e. "cat", "sha512sum" or "node index.js"
+ENV fprocess="cat"
+# Set to true to see request in function logs
+ENV write_debug="false"
+
+EXPOSE 8080
 
 CMD ["fwatchdog"]
 ```
-
-**Tip:**
-You can optimize Docker to cache getting the watchdog by using curl, instead of ADD.
-To do so, replace the related lines with:
-```
-RUN apk --no-cache add curl \
-    && curl -sL https://github.com/openfaas/faas/releases/download/0.9.14/fwatchdog > /usr/bin/fwatchdog \
-    && chmod +x /usr/bin/fwatchdog
-```
-
-**Implementing a health-check**
-
-At any point in time, if you detect that your function has become unhealthy and needs to restart, then you can delete the `/tmp/.lock` file which invalidates the check and causes Swarm to re-schedule the function.
-
-* Kubernetes
-
-For Kubernetes the health check is added through automation without you needing to alter the `Dockerfile`.
-
-* Swarm
-
-A Docker Swarm Healthcheck is required and is best practice. It will make sure that the watchdog is ready to accept a request before forwarding requests via the API Gateway. If the function or watchdog runs into an unrecoverable issue Swarm will also be able to restart the container.
-
-Here is an example of the `echo` function implementing a *health check* with a 5-second checking interval.
-
-```
-FROM functions/alpine
-
-ENV fprocess="cat /etc/hostname"
-
-HEALTHCHECK --interval=5s CMD [ -e /tmp/.lock ] || exit 1
-```
-
-The watchdog process creates a .lock file in `/tmp/` on starting its internal Golang HTTP server. `[ -e file_name ]` is shell to check if a file exists. With Windows Containers this is an invalid path so you may want to set the `suppress_lock` environmental variable.
-
-Read my Docker Swarm tutorial on Healthchecks:
-
- * [Test-drive Docker Healthcheck in 10 minutes](http://blog.alexellis.io/test-drive-healthcheck/)
 
 ## Environment variable overrides:
 
