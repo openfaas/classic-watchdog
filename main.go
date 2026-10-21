@@ -208,7 +208,7 @@ func makeJWTAuthHandler(c WatchdogConfig, next http.Handler) (http.Handler, erro
 		Debug:          c.jwtAuthDebug,
 	}
 
-	return auth.NewJWTAuthMiddleware(authOpts, next)
+	return auth.NewJWTAuthMiddleware(context.Background(), authOpts, next)
 }
 
 func getFnName() (string, error) {
