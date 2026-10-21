@@ -4,6 +4,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -255,5 +256,41 @@ func TestRead_MetricsPort(t *testing.T) {
 	if config.metricsPort != want {
 		t.Logf("metricsPort incorrect, got: %d - want: %d\n", config.metricsPort, want)
 		t.Fail()
+	}
+}
+
+func TestRead_JWTAuthIssuer(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		env  string
+		want string
+	}{
+		{name: "unset"},
+		{name: "empty", env: "jwt_auth_issuer="},
+		{
+			name: "configured",
+			env:  "jwt_auth_issuer=https://gateway.example.com",
+			want: "https://gateway.example.com",
+		},
+		{
+			name: "base-path-trailing-slash",
+			env:  "jwt_auth_issuer=https://gateway.example.com/tenant/",
+			want: "https://gateway.example.com/tenant/",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			defaults := NewEnvBucket()
+			parts := strings.SplitN(tc.env, "=", 2)
+			if parts[0] != "" {
+				defaults.Setenv(parts[0], parts[1])
+			}
+
+			readConfig := ReadConfig{}
+			config := readConfig.Read(defaults)
+
+			if config.jwtAuthIssuer != tc.want {
+				t.Fatalf("expected jwtAuthIssuer %q, got %q", tc.want, config.jwtAuthIssuer)
+			}
+		})
 	}
 }

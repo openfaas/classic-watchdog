@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"syscall"
 	"time"
@@ -201,11 +202,17 @@ func makeJWTAuthHandler(c WatchdogConfig, next http.Handler) (http.Handler, erro
 		return nil, fmt.Errorf("failed to get function name: %w", err)
 	}
 
+	var authority string
+	if c.jwtAuthIssuer != "" {
+		authority = strings.TrimRight(c.jwtAuthIssuer, "/") + "/.well-known/openid-configuration"
+	}
+
 	authOpts := auth.JWTAuthOptions{
 		Name:           name,
 		Namespace:      namespace,
 		LocalAuthority: c.jwtAuthLocal,
 		Debug:          c.jwtAuthDebug,
+		Authority:      authority,
 	}
 
 	return auth.NewJWTAuthMiddleware(context.Background(), authOpts, next)

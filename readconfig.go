@@ -98,6 +98,7 @@ func (ReadConfig) Read(hasEnv HasEnv) WatchdogConfig {
 	cfg.jwtAuthentication = parseBoolValue(hasEnv.Getenv("jwt_auth"))
 	cfg.jwtAuthDebug = parseBoolValue(hasEnv.Getenv("jwt_auth_debug"))
 	cfg.jwtAuthLocal = parseBoolValue(hasEnv.Getenv("jwt_auth_local"))
+	cfg.jwtAuthIssuer = hasEnv.Getenv("jwt_auth_issuer")
 
 	cfg.metricsPort = 8081
 	cfg.maxInflight = parseIntValue(hasEnv.Getenv("max_inflight"), 0)
@@ -161,6 +162,11 @@ type WatchdogConfig struct {
 	// jwtAuthLocal indicates wether the JWT authentication middleware should use a port-forwarded or
 	// local gateway running at `http://127.0.0.1:8000` instead of attempting to reach it via an in-cluster service
 	jwtAuthLocal bool
+
+	// jwtAuthIssuer overrides the issuer base URL used for function authentication,
+	// instead of the OpenFaaS gateway. The OpenID discovery document is
+	// resolved at `<issuer>/.well-known/openid-configuration`.
+	jwtAuthIssuer string
 
 	// maxInflight limits the number of simultaneous
 	// requests that the watchdog allows concurrently.
